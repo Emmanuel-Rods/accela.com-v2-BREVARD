@@ -33,32 +33,40 @@ function parseInspectionsData(inspectionHTML) {
     const infoTd = $(row).find(".ACA_Width45em");
 
     // The text data is stored in three <span> elements
-    const statusText = infoTd.find("span").eq(0).text().trim(); // e.g. "Passed" or "Failed"
-    const typeAndIdText = infoTd.find("span").eq(1).text().trim(); // e.g. "MS - Mono Slab (105995)"
-    const resultText = infoTd.find("span").eq(2).text().trim(); // e.g. "Result by: Paul Phipps on 06/20/2025 at 10:21 AM"
+    const statusText = infoTd.find("span").eq(0).text().trim(); // e.g. "Pass"
+    const typeAndIdText = infoTd.find("span").eq(1).text().trim(); // e.g. "Building Final"
+    const resultText = infoTd.find("span").eq(2).text().trim(); // e.g. "Result Date: 02/16/2024 at 03:29 PM"
 
-    // Separate the Inspection Type and the ID using Regex
+    // 1. Separate the Inspection Type and the ID using Regex
     let type = typeAndIdText;
     let id = "";
     const typeIdMatch = typeAndIdText.match(/(.+)\s+\((.+)\)/);
     if (typeIdMatch) {
-      type = typeIdMatch[1].trim(); // "MS - Mono Slab"
-      id = typeIdMatch[2].trim(); // "105995"
+      type = typeIdMatch[1].trim();
+      id = typeIdMatch[2].trim();
     }
 
-    // Separate the Inspector Name and Date using Regex
+    // 2. Extract Date and Inspector (Bulletproof Method)
     let inspector = "";
     let date = "";
-    const resultMatch = resultText.match(/\w+\s+by:\s+(.+)\s+on\s+(.+)/);
-    if (resultMatch) {
-      inspector = resultMatch[1].trim(); // "Paul Phipps"
-      date = resultMatch[2].trim(); // "06/20/2025 at 10:21 AM"
+
+    // Grab the date by looking for the MM/DD/YYYY pattern and capturing everything after it (the time)
+    // This works for "Result Date:", "Cancelled on:", and "Result by: Name on"
+    const dateMatch = resultText.match(/\d{2}\/\d{2}\/\d{4}.*/);
+    if (dateMatch) {
+      date = dateMatch[0].trim(); // Result: "02/16/2024 at 03:29 PM"
+    }
+
+    // Grab the inspector by looking for text exactly between "by:" and "on" (if it exists)
+    const inspectorMatch = resultText.match(/by:\s+(.+?)\s+on/i);
+    if (inspectorMatch) {
+      inspector = inspectorMatch[1].trim(); // Result: "Paul Phipps"
     }
 
     // 3. Extract the "View Details" URL from the onclick attribute
     const onclickAttr = $(row).find(".ACA_LinkButton a").attr("onclick") || "";
     let detailsUrl = "";
-    // Matches the first parameter passed to showInspectionPopupDialog('URL', ...)
+
     const urlMatch = onclickAttr.match(/showInspectionPopupDialog\('([^']+)'/);
     if (urlMatch) {
       detailsUrl = urlMatch[1];

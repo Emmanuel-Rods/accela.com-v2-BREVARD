@@ -15,7 +15,7 @@ async function getInspection(url, html, cookies) {
   const basePayload = buildBasicPayload(html);
   const payload = inspectionPayloadBuilder(basePayload);
   const inspectionHTML = await postToServer(url, payload, cookies);
-  fs.writeFileSync("inspecton.html", inspectionHTML); //!debugging purposes
+  //fs.writeFileSync("inspecton.html", inspectionHTML); //!debugging purposes
   let inspectionData = parseInspectionsData(inspectionHTML);
   const summary = inspectionData.summary; // summary is correct
 
@@ -37,6 +37,9 @@ async function getInspection(url, html, cookies) {
 
   /* for Brevard the inspections are behind another GET request  , to keep the simplicity of the program we are gonna 
   add some additonal post processing of the code*/
+
+  // code maybe used in the future @Roger
+  /*
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const inspectionsDetailsArray = [];
@@ -50,9 +53,11 @@ async function getInspection(url, html, cookies) {
     await delay(750);
   }
 
+  */
+
   return {
     summary: summary,
-    inspections: inspectionsDetailsArray, // changed from inspectionsDataArray , read upper comment
+    inspections: inspectionDataArray, // changed from inspectionsDataArray , read upper comment
   };
 }
 
