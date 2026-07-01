@@ -1,0 +1,6 @@
+node_modules/
+permits/
+cleaned_premits/
+daily_permits.json
+daily_permits_record_id.json
+*.zip

@@ -1,0 +1,19 @@
+{
+  "name": "accela.com-v2-daily-updater",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "Roger Rodrigues",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "cleanup": "node dev/cleanup.js",
+    "cu": "node dev/cleanup.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.1",
+    "axios": "^1.17.0",
+    "cheerio": "^1.2.0",
+    "lodash": "^4.18.1"
+  }
+}
