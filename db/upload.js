@@ -49,7 +49,7 @@ async function uploadFolder(FOLDER_PATH) {
 
         // --- 2. CLEAN PARSING ---
         const permitBlock = rawJson.recordInfo || {};
-
+        const pId = permitBlock["recordId"];
         const pNum = permitBlock["Record Number"];
         const status = permitBlock.recordStatus;
 
@@ -63,7 +63,7 @@ async function uploadFolder(FOLDER_PATH) {
 
         // --- 3. BUILD THE ROW ---
         batch.push({
-          permit_id: pNum,
+          permit_id: pId,
           permit_number: pNum,
           status: status ? status : "UNKNOWN",
           permit_data: rawJson,
