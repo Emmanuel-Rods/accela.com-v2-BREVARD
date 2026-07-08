@@ -2,12 +2,13 @@ const fs = require("fs/promises");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 
+require("dotenv").config();
 // --- 1. CONFIGURATION ---
-const SUPABASE_URL = "https://dddsaythhlflyzuxcdha.supabase.co";
-const SUPABASE_KEY = "";
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const TABLE_NAME = "scraper_test";
+const TABLE_NAME = process.env.TABLE;
 // const TABLE_NAME = "fl_hillsborough_permits";
 
 const BATCH_SIZE = 100;
@@ -47,8 +48,9 @@ async function uploadFolder(FOLDER_PATH) {
         const fileContent = await fs.readFile(filePath, "utf-8");
         const rawJson = JSON.parse(fileContent);
 
+        const permit_hash = rawJson.permit_hash;
         // --- 2. CLEAN PARSING ---
-        const permitBlock = rawJson.recordInfo || {};
+        const permitBlock = rawJson.permit_data.recordInfo || {};
         const pId = permitBlock["recordId"];
         const pNum = permitBlock["Record Number"];
         const status = permitBlock.recordStatus;
@@ -66,7 +68,8 @@ async function uploadFolder(FOLDER_PATH) {
           permit_id: pId,
           permit_number: pNum,
           status: status ? status : "UNKNOWN",
-          permit_data: rawJson,
+          permit_data: rawJson.permit_data,
+          data_hash: permit_hash,
         });
       } catch (err) {
         console.error(
