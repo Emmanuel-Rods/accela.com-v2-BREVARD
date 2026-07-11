@@ -7,7 +7,7 @@ const cleanupFolders = require("./utils/deleteFolders.js");
 
 const fs = require("fs");
 
-const status = "Inspection Phase";
+const status = "*";
 
 async function main() {
   const file = await getDataByStatus(status); //return filename
