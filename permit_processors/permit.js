@@ -41,7 +41,7 @@ async function fetchPermitData(inputfile) {
     const records = JSON.parse(fileContent);
 
     // 2. Split records into batches of 3
-    const BATCH_SIZE = 3;
+    const BATCH_SIZE = 2;
     const batches = chunkArray(records, BATCH_SIZE);
 
     console.log(
