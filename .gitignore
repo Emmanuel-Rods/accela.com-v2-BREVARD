@@ -5,3 +5,4 @@ daily_permits.json
 daily_permits_record_id.json
 *.zip
 .env
+DIFF_FOLDER
