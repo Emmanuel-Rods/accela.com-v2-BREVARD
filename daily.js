@@ -1,27 +1,31 @@
 const parseCSVToJSON = require("./utils/CSVJSON.js");
 const processRecords = require("./record_processors/process.js");
 const fetchPermitData = require("./permit_processors/permit.js");
-const cleanJSONinFolder = require("./utils/cleaner.js");
 const uploadFolder = require("./db/upload.js");
 const cleanupFolders = require("./utils/deleteFolders.js");
 
 const fs = require("fs").promises;
 
-const targetTypes = [
-  "COM New Construction",
-  "RES SFR Addition",
-  "RES SFR-Duplex New",
-];
+const {
+  dateOffset,
+  requiredStatuses,
+  requiredSecondaryData,
+} = require("./config.js");
 
-const INPUT_FILE = "older_permits.csv"; // <- here
+const INPUT_FILE = "brevard.csv"; // <- here
 
 async function main() {
   const input_data = await fs.readFile(INPUT_FILE, "utf-8");
   const dailyData = parseCSVToJSON(input_data);
 
-  // filtering
-  const filteredApplications = dailyData.filter((app) =>
-    targetTypes.includes(app["Application Type"]),
+  // filtering by statuss
+  const filteredStatuses = dailyData.filter((app) =>
+    requiredStatuses.includes(app["Status"]),
+  );
+
+  // filtering by applications
+  const filteredApplications = filteredStatuses.filter((app) =>
+    requiredSecondaryData.includes(app["Application Type"]),
   );
 
   await fs.writeFile(
@@ -33,12 +37,12 @@ async function main() {
   await processRecords("daily_permits.json", "daily_permits_record_id.json");
   //once ids
   await fetchPermitData("daily_permits_record_id.json");
-  // await cleanJSONinFolder("permits", "cleaned_permits");
-  // await uploadFolder("cleaned_permits");
-  // await cleanupFolders(["cleaned_permits", "permits"]);
 
-  // await fs.rm("daily_permits_record_id.json", { force: true });
-  // await fs.rm("daily_permits.json", { force: true });
+  await uploadFolder("permits");
+  await cleanupFolders(["cleaned_permits", "permits"]);
+
+  await fs.rm("daily_permits_record_id.json", { force: true });
+  await fs.rm("daily_permits.json", { force: true });
 }
 
 main();

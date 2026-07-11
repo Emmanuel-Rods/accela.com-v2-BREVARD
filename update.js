@@ -1,22 +1,35 @@
 const getDataByStatus = require("./db/getPreviousData.js");
 const fetchPermitData = require("./permit_processors/permit.js");
 const cleanJSONinFolder = require("./utils/cleaner.js");
-const compareData = require("./utils/compare.js");
 const uploadFolder = require("./db/upload.js");
 const cleanupFolders = require("./utils/deleteFolders.js");
+const { comparePermitHashes } = require("./utils/hashes/hash.compare.js");
 
 const fs = require("fs");
 
-const status = "*";
+const { updateStatuses } = require("./config.js");
 
-async function main() {
+async function processStatus(status) {
   const file = await getDataByStatus(status); //return filename
   await fetchPermitData(file);
-  await cleanJSONinFolder("permits", "cleaned_permits");
-  await compareData(file, "cleaned_permits", "DIFF_FOLDER");
+  comparePermitHashes(file, "permits", "DIFF_FOLDER");
   await uploadFolder("DIFF_FOLDER");
-  // await cleanupFolders(["cleaned_permits", "DIFF_FOLDER", "permits"]);
-  // fs.rmSync(file, { force: true }); // remove inspection phase.json
+  await cleanupFolders(["DIFF_FOLDER", "permits"]);
+  fs.rmSync(file, { force: true });
+}
+
+async function main() {
+  // Loop through each status sequentially
+  for (const status of updateStatuses) {
+    try {
+      console.log(`Starting process for status: ${status}...`);
+      await processStatus(status);
+      console.log(`Successfully finished processing: ${status}\n`);
+    } catch (error) {
+      console.error(`Error processing status '${status}':`, error);
+    }
+  }
+  console.log("All statuses processed.");
 }
 
 main();
