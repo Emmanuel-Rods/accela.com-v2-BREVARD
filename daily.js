@@ -3,6 +3,7 @@ const processRecords = require("./record_processors/process.js");
 const fetchPermitData = require("./permit_processors/permit.js");
 const uploadFolder = require("./db/upload.js");
 const cleanupFolders = require("./utils/deleteFolders.js");
+const { downloadCSV } = require("./download_csv/main.js");
 
 const fs = require("fs").promises;
 
@@ -12,9 +13,12 @@ const {
   requiredSecondaryData,
 } = require("./config.js");
 
-const INPUT_FILE = "brevard.csv"; // <- here
-
 async function main() {
+  const csv = await downloadCSV(dateOffset);
+  if (!csv) {
+    throw new Error("Failed to Download CSV");
+  }
+  const INPUT_FILE = "daily.csv"; // downloadCSV function saves content in this file
   const input_data = await fs.readFile(INPUT_FILE, "utf-8");
   const dailyData = parseCSVToJSON(input_data);
 
@@ -27,6 +31,12 @@ async function main() {
   const filteredApplications = filteredStatuses.filter((app) =>
     requiredSecondaryData.includes(app["Application Type"]),
   );
+
+  // if there are no applications after filtering
+  if (filteredApplications.length === 0) {
+    console.log("No Applications left for processing after filtering");
+    return;
+  }
 
   await fs.writeFile(
     "daily_permits.json",
