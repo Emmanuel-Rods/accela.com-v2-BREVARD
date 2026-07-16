@@ -35,6 +35,12 @@ async function logErrorToFile(message) {
 
 async function fetchPermitData(inputfile) {
   try {
+    // Ensure the permits directory exists
+    if (!fsSync.existsSync("permits")) {
+      fsSync.mkdirSync("permits");
+      console.log("Permits directory created.");
+    }
+
     // 1. Read the data from the input JSON
     console.log(`Reading ${inputfile}...`);
     const fileContent = await fs.readFile(inputfile, "utf8");
